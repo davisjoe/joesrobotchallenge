@@ -1,0 +1,87 @@
+pi@raspberrypi:~/button_test $ sudo pip install pyusb
+Requirement already satisfied (use --upgrade to upgrade): pyusb in /usr/lib/python2.7/dist-packages
+Cleaning up...
+pi@raspberrypi:~/button_test $ python PanicButton.py 
+Traceback (most recent call last):
+  File "PanicButton.py", line 10, in <module>
+    import usb.core
+ImportError: No module named core
+pi@raspberrypi:~/button_test $ sudo python PanicButton.py 
+Traceback (most recent call last):
+  File "PanicButton.py", line 10, in <module>
+    import usb.core
+ImportError: No module named core
+pi@raspberrypi:~/button_test $ python3 PanicButton.py 
+  File "PanicButton.py", line 21
+    except Exception, e:
+                    ^
+SyntaxError: invalid syntax
+pi@raspberrypi:~/button_test $ sudo python3 PanicButton.py 
+  File "PanicButton.py", line 21
+    except Exception, e:
+                    ^
+SyntaxError: invalid syntax
+pi@raspberrypi:~/button_test $ 
+
+pi@raspberrypi:~/button_test $ sudo pip uninstall pyusb
+Not uninstalling pyusb at /usr/lib/python2.7/dist-packages, owned by OS
+pi@raspberrypi:~/button_test $ 
+
+cp ~/Downloads/pyusb-1.0.0-a1.tar.gz .
+   47  tar xzvf pyusb-1.0.0-a1.tar.gz 
+   48  cd pyusb-1.0.0-a1/
+
+sudo python setup.py install
+   52  python3 PanicButton.py 
+pi@raspberrypi:~/button_test $ sudo python3 PanicButton.py 
+  File "PanicButton.py", line 21
+    except Exception, e:
+                    ^
+SyntaxError: invalid syntax
+
+pi@raspberrypi:~/button_test $ sudo python PanicButton.py 
+Traceback (most recent call last):
+  File "PanicButton.py", line 33, in <module>
+    button = PanicButton()
+  File "PanicButton.py", line 17, in __init__
+    raise ValueError("Panic Button not found")
+ValueError: Panic Button not found
+
+
+
+pi@raspberrypi:~/button_test $ sudo python PanicButton.py 
+Pressed
+Pressed
+Pressed
+
+
+sudo python3
+
+pi@raspberrypi:~ $ sudo python3
+Python 3.4.2 (default, Oct 19 2014, 13:31:11) 
+[GCC 4.9.1] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import usb.core
+>>> dev = usb.core.find(idVendor=0x1130, idProduct=0x0202)
+>>> dev
+<usb.core.Device object at 0xb67c5b70>
+>>> dev.detach_kernel_driver(0)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "/usr/local/lib/python3.4/dist-packages/usb/core.py", line 695, in detach_kernel_driver
+    self._ctx.backend.detach_kernel_driver(self._ctx.handle, interface)
+  File "/usr/local/lib/python3.4/dist-packages/usb/_debug.py", line 52, in do_trace
+    return f(*args, **named_args)
+  File "/usr/local/lib/python3.4/dist-packages/usb/backend/libusb10.py", line 565, in detach_kernel_driver
+    _check(_lib.libusb_detach_kernel_driver(dev_handle, intf))
+  File "/usr/local/lib/python3.4/dist-packages/usb/backend/libusb10.py", line 357, in _check
+    raise USBError(_str_error[retval.value])
+usb.core.USBError: Entity not found
+>>> dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0]
+0
+>>> dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0]
+1
+>>> 
+
+
+
