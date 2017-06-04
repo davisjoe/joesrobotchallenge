@@ -38,7 +38,7 @@ while True: # the main game loop
             direction = 'right'
 
     #DISPLAYSURF.blit(catImg, (catx, caty))
-    pygame.draw.rect(DISPLAYSURF, RED, (catx, caty, 100, 50))
+    pygame.draw.rect(DISPLAYSURF, (255,0,0), (catx, caty, 100, 50))
 
     for event in pygame.event.get():
         if event.type == QUIT:
