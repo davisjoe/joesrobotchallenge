@@ -4,7 +4,7 @@ from pygame.locals import *
 
 import usb.core
 import RPi.GPIO as GPIO
-import time
+import time, random
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setwarnings(False)
@@ -15,12 +15,16 @@ GPIO.setup(9, GPIO.OUT)
 GPIO.setup(10, GPIO.OUT)
 
 pygame.init()
+#print(pygame.font.get_fonts())
+gameFont = pygame.font.SysFont("roboto", 172, True)
+
+
 
 FPS = 90 # frames per second setting
 fpsClock = pygame.time.Clock()
 
 # set up the window
-width = 800
+width = 1600
 height = 1000
 DISPLAYSURF = pygame.display.set_mode((width, height), 0, 32)
 pygame.display.set_caption('Joe\'s Robot Challenge')
@@ -82,6 +86,40 @@ GPIO.output(9, 0)
 GPIO.output(10, 0)
 
 
+
+#forward (right wheel)
+#GPIO.output(9, 0)
+#GPIO.output(10, 1)
+
+#forward (left wheel)
+#GPIO.output(7, 0)
+#GPIO.output(8, 1)
+
+text = gameFont.render("Positioning Robot", True, (0,0,0))
+
+initialT = pygame.time.get_ticks()
+delayMS = 5000
+
+intime=True
+textx = 100
+texty = 300
+rrange = 40
+while intime: # the robot positioning loop
+    DISPLAYSURF.fill(SNOW)
+    textxr = textx - (rrange/2) + random.randrange(0,rrange)
+    textyr = texty - (rrange/2) + random.randrange(0,rrange)
+    DISPLAYSURF.blit(text, (textxr ,textyr))
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+
+    pygame.display.update()
+    fpsClock.tick(12)
+    if (initialT + delayMS) < pygame.time.get_ticks() :
+        print("time elapsed")
+        intime = False
+        
 x = 10
 y = 10
 speed = 50
@@ -90,16 +128,6 @@ puckWidth = 100
 puckHeight = 100      
 pressed = False
 
-#forward (right wheel)
-#GPIO.output(9, 0)
-#GPIO.output(10, 1)
-
-#forward (left wheel)
-GPIO.output(7, 0)
-GPIO.output(8, 1)
-
-initialT = pygame.time.get_ticks()
-delayMS = 1000
 while not pressed: # the up-down loop
     DISPLAYSURF.fill(SNOW)
 
@@ -127,9 +155,7 @@ while not pressed: # the up-down loop
     if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
       print ("Pressed at y = ", y)
       pressed = True
-    if (initialT + delayMS) < pygame.time.get_ticks() :
-        print("time elapsed")
-        pressed = True
+
             
 #clear motor signals
 GPIO.output(7, 0)
