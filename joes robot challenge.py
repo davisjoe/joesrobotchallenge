@@ -95,6 +95,21 @@ GPIO.output(10, 0)
 #GPIO.output(7, 0)
 #GPIO.output(8, 1)
 
+xpercent = (x/width) * 100
+print ("total x%", xpercent)
+middle = width / 2
+if (x == middle) :
+    x+=1
+if (x < middle) :
+    print("left")
+    xpercent = (x/middle) *100
+    print ("left x %", xpercent)
+else :
+    print("right")
+    xpercent = ((x-middle)/middle) * 100
+    print ("right x%",xpercent)
+
+
 text = gameFont.render("Positioning Robot", True, (0,0,0))
 
 initialT = pygame.time.get_ticks()
@@ -155,6 +170,9 @@ while not pressed: # the up-down loop
     if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
       print ("Pressed at y = ", y)
       pressed = True
+
+ypercent = (y/height) * 100
+print ("total y%", (100-ypercent))
 
             
 #clear motor signals
