@@ -33,7 +33,7 @@ SNOW = (255, 255, 255)
 #catImg = pygame.image.load('cat.png')
 x = 10
 y = 10
-speed = 50
+speed = 5
 direction = 'right'
 puckWidth = 100
 puckHeight = 100
@@ -49,7 +49,7 @@ try:
 except Exception as e :
     print(e)
 
-    
+# ===================== Left Right Loop ======================    
 pressed = False
 while not pressed: # the left-right loop
     DISPLAYSURF.fill(SNOW)
@@ -79,6 +79,8 @@ while not pressed: # the left-right loop
       print ("Pressed at x = ", x)
       pressed = True
 
+
+# ===================== Motor run ======================  
 #clear motor signals
 GPIO.output(7, 0)
 GPIO.output(8, 0)
@@ -86,40 +88,55 @@ GPIO.output(9, 0)
 GPIO.output(10, 0)
 
 
-
-#forward (right wheel)
-#GPIO.output(9, 0)
-#GPIO.output(10, 1)
-
-#forward (left wheel)
-#GPIO.output(7, 0)
-#GPIO.output(8, 1)
-
 xpercent = (x/width) * 100
 print ("total x%", xpercent)
+turn = "none"
 middle = width / 2
+maxruntime=1000
 if (x == middle) :
     x+=1
 if (x < middle) :
     print("left")
-    xpercent = (x/middle) *100
+    turn = "left"
+    xpercent = 100 - ((x/middle) *100)
     print ("left x %", xpercent)
 else :
     print("right")
+    turn = "right"
     xpercent = ((x-middle)/middle) * 100
     print ("right x%",xpercent)
 
+runtime = (xpercent/100) * maxruntime
+print ("runtime calculated as", runtime, "of", maxruntime)
 
 text = gameFont.render("Positioning Robot", True, (0,0,0))
 
 initialT = pygame.time.get_ticks()
-delayMS = 5000
-
+delayMS = runtime
+if (turn == "left") :
+    #right wheel
+    GPIO.output(9, 0)
+    GPIO.output(10, 1)
+    #left wheel
+    GPIO.output(7, 1) #reverse
+    GPIO.output(8, 0)
+elif (turn=="right") :
+    #right wheel
+    GPIO.output(9, 1) #reverse
+    GPIO.output(10, 0)
+    #left wheel
+    GPIO.output(7, 0)
+    GPIO.output(8, 1)
+else :
+    print ("AGHHHhhhh.......! 29")
+    pygame.quit()
+    sys.exit()
+    
 intime=True
 textx = 100
 texty = 300
 rrange = 40
-while intime: # the robot positioning loop
+while intime: # =========the robot positioning loop=============
     DISPLAYSURF.fill(SNOW)
     textxr = textx - (rrange/2) + random.randrange(0,rrange)
     textyr = texty - (rrange/2) + random.randrange(0,rrange)
@@ -134,10 +151,18 @@ while intime: # the robot positioning loop
     if (initialT + delayMS) < pygame.time.get_ticks() :
         print("time elapsed")
         intime = False
-        
+
+#clear motor signals
+GPIO.output(7, 0)
+GPIO.output(8, 0)
+GPIO.output(9, 0)
+GPIO.output(10, 0)
+
+
+# ===================== Up Down Loop ======================          
 x = 10
 y = 10
-speed = 50
+speed = 5
 direction = 'down'
 puckWidth = 100
 puckHeight = 100      
@@ -171,8 +196,14 @@ while not pressed: # the up-down loop
       print ("Pressed at y = ", y)
       pressed = True
 
-ypercent = (y/height) * 100
-print ("total y%", (100-ypercent))
+# show disconnect message
+# press button to start countdown
+
+ypercent = 100 - ((y/height) * 100)
+print ("total y%", ypercent)
+maxruntime = 5000
+runtime = (ypercent/100) * maxruntime
+print ("runtime calculated as", runtime, "ms of a possible", maxruntime, "ms")
 
             
 #clear motor signals
