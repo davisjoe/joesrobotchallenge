@@ -21,14 +21,14 @@ FPS = 90 # frames per second setting
 fpsClock = pygame.time.Clock()
 
 # set up the window
-width = 1600
+width = 1680
 height = 1000
 DISPLAYSURF = pygame.display.set_mode((width, height), 0, 32)
 pygame.display.set_caption('Joe\'s Robot Challenge')
 
 SNOW = (255, 255, 255)
-#catImg = pygame.image.load('cat.png')
-
+joeImg = pygame.image.load('/home/pi/Pictures/joe.png')
+joeImg.convert()
 
 while True :  # keep on running
 
@@ -51,12 +51,40 @@ while True :  # keep on running
     except Exception as e :
         print(e)
 
-    x = 10
-    y = 10
-    speed = 5
+    x = 100
+    y = 810
+    speed = 50
     direction = 'right'
     puckWidth = 100
     puckHeight = 100
+    sweepwidth= width - 200
+    joex=500
+    joey=0
+
+    pressed = False
+    textx = 260
+    texty = 600
+    rrange = 10
+    text = gameFontSmall.render("Press to start", True, (0,255,0))
+    while not pressed: # the wait for button indicating disconnect loop
+        DISPLAYSURF.fill(SNOW)
+        textxr = textx - (rrange/2) + random.randrange(0,rrange)
+        textyr = texty - (rrange/2) + random.randrange(0,rrange)
+        DISPLAYSURF.blit(joeImg, (joex, joey))
+        DISPLAYSURF.blit(text, (textxr ,textyr))
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        fpsClock.tick(2)
+        if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
+          print ("Pressed at y = ", y)
+          pressed = True
+
+    
 
     # ===================== Left Right Loop ======================    
     pressed = False
@@ -65,16 +93,17 @@ while True :  # keep on running
 
         if direction == 'right':
             x += speed
-            if x >= width:
+            if x >= sweepwidth:
                 direction = 'left'
 
         elif direction == 'left':
             x -= speed
-            if x <= 10:
+            if x <= 100:
                 direction = 'right'
 
 
-        #DISPLAYSURF.blit(catImg, (catx, caty))
+        #DISPLAYSURF.blit(joeImg, (joex, joey))
+        pygame.draw.rect(DISPLAYSURF, (0,0,0), (width/2, y-40, 2, 100))
         pygame.draw.rect(DISPLAYSURF, (255,0,0), (x, y, puckWidth, puckHeight))
 
         for event in pygame.event.get():
@@ -90,11 +119,11 @@ while True :  # keep on running
 
 
 
-
+    time.sleep(2)
     # ===================== Up Down Loop ======================          
     x = 10
     y = 10
-    speed = 5
+    speed = 55
     direction = 'down'
     puckWidth = 100
     puckHeight = 100      
@@ -115,6 +144,11 @@ while True :  # keep on running
 
 
         #DISPLAYSURF.blit(catImg, (catx, caty))
+        pygame.draw.rect(DISPLAYSURF, (0,0,0), (x, 60, 400, 2))
+        pygame.draw.rect(DISPLAYSURF, (0,0,0), (x, 250, 300, 2))
+        pygame.draw.rect(DISPLAYSURF, (0,0,0), (x, height/2, 200, 2))
+        pygame.draw.rect(DISPLAYSURF, (0,0,0), (x, height-300, 130, 2))
+        pygame.draw.rect(DISPLAYSURF, (0,0,0), (x, height-60, 120, 2))
         pygame.draw.rect(DISPLAYSURF, (255,0,0), (x, y, puckWidth, puckHeight))
 
         for event in pygame.event.get():
@@ -127,18 +161,20 @@ while True :  # keep on running
         if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
           print ("Pressed at y = ", y)
           pressed = True
-
+          
+    time.sleep(2)
     # show disconnect message
     text = gameFontSmall.render("DISCONNECT ROBOT NOW!", True, (255,0,0))
     # press button to start countdown
     pressed = False
-    textx = 10
-    texty = 300
+    textx = 60
+    texty = 500
     rrange = 40
     while not pressed: # the wait for button indicating disconnect loop
         DISPLAYSURF.fill(SNOW)
         textxr = textx - (rrange/2) + random.randrange(0,rrange)
         textyr = texty - (rrange/2) + random.randrange(0,rrange)
+        DISPLAYSURF.blit(joeImg, (joex, joey))
         DISPLAYSURF.blit(text, (textxr ,textyr))
 
         for event in pygame.event.get():
@@ -153,7 +189,7 @@ while True :  # keep on running
           pressed = True
 
     intime=True
-    countdownms = 10 * 1000
+    countdownms = 5 * 1000
     initialT = pygame.time.get_ticks()
     delayMS = countdownms
 
@@ -252,19 +288,6 @@ while True :  # keep on running
     GPIO.output(9, 0)
     GPIO.output(10, 0)
                 
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     #run robot forward
     ypercent = 100 - ((y/height) * 100)
