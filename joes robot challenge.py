@@ -9,9 +9,6 @@ import time, random
 
 
 
-
-
-
 pygame.init()
 #print(pygame.font.get_fonts())
 gameFont = pygame.font.SysFont("roboto", 172, True)
@@ -53,7 +50,7 @@ while True :  # keep on running
 
     x = 100
     y = 810
-    speed = 50
+    speed = 50 # L&R 
     direction = 'right'
     puckWidth = 100
     puckHeight = 100
@@ -115,6 +112,7 @@ while True :  # keep on running
         fpsClock.tick(FPS)
         if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
           print ("Pressed at x = ", x)
+          userx=x
           pressed = True
 
 
@@ -123,7 +121,7 @@ while True :  # keep on running
     # ===================== Up Down Loop ======================          
     x = 10
     y = 10
-    speed = 55
+    speed = 50 # Up & Down speed 
     direction = 'down'
     puckWidth = 100
     puckHeight = 100      
@@ -160,6 +158,7 @@ while True :  # keep on running
         fpsClock.tick(FPS)
         if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
           print ("Pressed at y = ", y)
+          usery=y
           pressed = True
           
     time.sleep(2)
@@ -217,23 +216,23 @@ while True :  # keep on running
     GPIO.output(9, 0)
     GPIO.output(10, 0)
 
-
-    xpercent = (x/width) * 100
+    print ("userx as", userx,width)
+    xpercent = (userx/width) * 100 
     print ("total x%", xpercent)
     turn = "none"
     middle = width / 2
-    maxruntime=1000
-    if (x == middle) :
-        x+=1
-    if (x < middle) :
+    maxruntime=500
+    if (userx == middle) :
+        userx+=1
+    if (userx < middle) :
         print("left")
         turn = "left"
-        xpercent = 100 - ((x/middle) *100)
+        xpercent = 100 - ((userx/middle) *100)
         print ("left x %", xpercent)
     else :
         print("right")
         turn = "right"
-        xpercent = ((x-middle)/middle) * 100
+        xpercent = ((userx-middle)/middle) * 100
         print ("right x%",xpercent)
 
     runtime = (xpercent/100) * maxruntime
@@ -290,7 +289,7 @@ while True :  # keep on running
                 
 
     #run robot forward
-    ypercent = 100 - ((y/height) * 100)
+    ypercent = 100 - ((usery/height) * 100)
     print ("total y%", ypercent)
     maxruntime = 5000
     minruntime = 1000
