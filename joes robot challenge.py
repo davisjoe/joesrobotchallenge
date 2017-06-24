@@ -1,24 +1,21 @@
 #Joe's Robot Challenge
+
 import pygame, sys
 from pygame.locals import *
-
 import usb.core
 import RPi.GPIO as GPIO
 import time, random
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
 
-GPIO.setup(7, GPIO.OUT)
-GPIO.setup(8, GPIO.OUT)
-GPIO.setup(9, GPIO.OUT)
-GPIO.setup(10, GPIO.OUT)
+
+
+
+
 
 pygame.init()
 #print(pygame.font.get_fonts())
 gameFont = pygame.font.SysFont("roboto", 172, True)
 gameFontSmall = pygame.font.SysFont("roboto", 122, True)
-
 
 FPS = 90 # frames per second setting
 fpsClock = pygame.time.Clock()
@@ -31,265 +28,288 @@ pygame.display.set_caption('Joe\'s Robot Challenge')
 
 SNOW = (255, 255, 255)
 #catImg = pygame.image.load('cat.png')
-x = 10
-y = 10
-speed = 5
-direction = 'right'
-puckWidth = 100
-puckHeight = 100
 
 
-dev = usb.core.find(idVendor=0x1130, idProduct=0x0202)
-if not dev :
-    print('USB Button is NOT ATTACHED!!')
-    exit()
-    
-try:    
-    dev.detach_kernel_driver(0) # Get rid of hidraw
-except Exception as e :
-    print(e)
+while True :  # keep on running
 
-# ===================== Left Right Loop ======================    
-pressed = False
-while not pressed: # the left-right loop
-    DISPLAYSURF.fill(SNOW)
+    #setup pins for motors
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setwarnings(False)
+    GPIO.setup(7, GPIO.OUT)
+    GPIO.setup(8, GPIO.OUT)
+    GPIO.setup(9, GPIO.OUT)
+    GPIO.setup(10, GPIO.OUT)
+    #setup button
+    dev = usb.core.find(idVendor=0x1130, idProduct=0x0202)
+    while not dev :
+        print('USB Button is NOT ATTACHED!!')
+        dev = usb.core.find(idVendor=0x1130, idProduct=0x0202)
+        time.sleep(1)
+        
+    try:    
+        dev.detach_kernel_driver(0) # Get rid of hidraw
+    except Exception as e :
+        print(e)
 
-    if direction == 'right':
-        x += speed
-        if x >= width:
-            direction = 'left'
+    x = 10
+    y = 10
+    speed = 5
+    direction = 'right'
+    puckWidth = 100
+    puckHeight = 100
 
-    elif direction == 'left':
-        x -= speed
-        if x <= 10:
-            direction = 'right'
+    # ===================== Left Right Loop ======================    
+    pressed = False
+    while not pressed: # the left-right loop
+        DISPLAYSURF.fill(SNOW)
 
+        if direction == 'right':
+            x += speed
+            if x >= width:
+                direction = 'left'
 
-    #DISPLAYSURF.blit(catImg, (catx, caty))
-    pygame.draw.rect(DISPLAYSURF, (255,0,0), (x, y, puckWidth, puckHeight))
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    pygame.display.update()
-    fpsClock.tick(FPS)
-    if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
-      print ("Pressed at x = ", x)
-      pressed = True
-
-
-# ===================== Motor run ======================  
-#clear motor signals
-GPIO.output(7, 0)
-GPIO.output(8, 0)
-GPIO.output(9, 0)
-GPIO.output(10, 0)
+        elif direction == 'left':
+            x -= speed
+            if x <= 10:
+                direction = 'right'
 
 
-xpercent = (x/width) * 100
-print ("total x%", xpercent)
-turn = "none"
-middle = width / 2
-maxruntime=1000
-if (x == middle) :
-    x+=1
-if (x < middle) :
-    print("left")
-    turn = "left"
-    xpercent = 100 - ((x/middle) *100)
-    print ("left x %", xpercent)
-else :
-    print("right")
-    turn = "right"
-    xpercent = ((x-middle)/middle) * 100
-    print ("right x%",xpercent)
+        #DISPLAYSURF.blit(catImg, (catx, caty))
+        pygame.draw.rect(DISPLAYSURF, (255,0,0), (x, y, puckWidth, puckHeight))
 
-runtime = (xpercent/100) * maxruntime
-print ("runtime calculated as", runtime, "of", maxruntime)
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
-text = gameFont.render("Positioning Robot", True, (0,0,0))
+        pygame.display.update()
+        fpsClock.tick(FPS)
+        if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
+          print ("Pressed at x = ", x)
+          pressed = True
 
-initialT = pygame.time.get_ticks()
-delayMS = runtime
-if (turn == "left") :
+
+
+
+    # ===================== Up Down Loop ======================          
+    x = 10
+    y = 10
+    speed = 5
+    direction = 'down'
+    puckWidth = 100
+    puckHeight = 100      
+    pressed = False
+
+    while not pressed: # the up-down loop
+        DISPLAYSURF.fill(SNOW)
+
+        if direction == 'down':
+            y += speed
+            if y >= height:
+                direction = 'up'
+
+        elif direction == 'up':
+            y -= speed
+            if y <= 10:
+                direction = 'down'
+
+
+        #DISPLAYSURF.blit(catImg, (catx, caty))
+        pygame.draw.rect(DISPLAYSURF, (255,0,0), (x, y, puckWidth, puckHeight))
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        fpsClock.tick(FPS)
+        if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
+          print ("Pressed at y = ", y)
+          pressed = True
+
+    # show disconnect message
+    text = gameFontSmall.render("DISCONNECT ROBOT NOW!", True, (255,0,0))
+    # press button to start countdown
+    pressed = False
+    textx = 10
+    texty = 300
+    rrange = 40
+    while not pressed: # the wait for button indicating disconnect loop
+        DISPLAYSURF.fill(SNOW)
+        textxr = textx - (rrange/2) + random.randrange(0,rrange)
+        textyr = texty - (rrange/2) + random.randrange(0,rrange)
+        DISPLAYSURF.blit(text, (textxr ,textyr))
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        fpsClock.tick(FPS)
+        if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
+          print ("Pressed at y = ", y)
+          pressed = True
+
+    intime=True
+    countdownms = 10 * 1000
+    initialT = pygame.time.get_ticks()
+    delayMS = countdownms
+
+    text = gameFont.render("Counting Down", True, (0,100,0))
+    while intime: # =========countdown loop=============
+        DISPLAYSURF.fill(SNOW)
+        textxr = textx - (rrange/2) + random.randrange(0,rrange)
+        textyr = texty - (rrange/2) + random.randrange(0,rrange)
+        DISPLAYSURF.blit(text, (textxr ,textyr))
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        fpsClock.tick(12)
+        if (initialT + delayMS) < pygame.time.get_ticks() :
+            print("time elapsed")
+            intime = False
+
+    # ===================== Motor run for positioning ======================  
+    #clear motor signals
+    GPIO.output(7, 0)
+    GPIO.output(8, 0)
+    GPIO.output(9, 0)
+    GPIO.output(10, 0)
+
+
+    xpercent = (x/width) * 100
+    print ("total x%", xpercent)
+    turn = "none"
+    middle = width / 2
+    maxruntime=1000
+    if (x == middle) :
+        x+=1
+    if (x < middle) :
+        print("left")
+        turn = "left"
+        xpercent = 100 - ((x/middle) *100)
+        print ("left x %", xpercent)
+    else :
+        print("right")
+        turn = "right"
+        xpercent = ((x-middle)/middle) * 100
+        print ("right x%",xpercent)
+
+    runtime = (xpercent/100) * maxruntime
+    print ("runtime calculated as", runtime, "of", maxruntime)
+
+    text = gameFont.render("Positioning Robot", True, (0,0,0))
+
+    initialT = pygame.time.get_ticks()
+    delayMS = runtime
+    if (turn == "left") :
+        #right wheel
+        GPIO.output(9, 0) #forward
+        GPIO.output(10, 1)
+        #left wheel
+        GPIO.output(7, 1) #reverse
+        GPIO.output(8, 0)
+    elif (turn=="right") :
+        #right wheel
+        GPIO.output(9, 1) #reverse
+        GPIO.output(10, 0)
+        #left wheel
+        GPIO.output(7, 0) #forward
+        GPIO.output(8, 1)
+    else :
+        print ("AGHHHhhhh.......! 29")
+        pygame.quit()
+        sys.exit()
+        
+    intime=True
+    textx = 100
+    texty = 300
+    rrange = 40
+    while intime: # =========the robot positioning loop=============
+        DISPLAYSURF.fill(SNOW)
+        textxr = textx - (rrange/2) + random.randrange(0,rrange)
+        textyr = texty - (rrange/2) + random.randrange(0,rrange)
+        DISPLAYSURF.blit(text, (textxr ,textyr))
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+
+        pygame.display.update()
+        fpsClock.tick(12)
+        if (initialT + delayMS) < pygame.time.get_ticks() :
+            print("time elapsed")
+            intime = False
+
+    #clear motor signals
+    GPIO.output(7, 0)
+    GPIO.output(8, 0)
+    GPIO.output(9, 0)
+    GPIO.output(10, 0)
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    #run robot forward
+    ypercent = 100 - ((y/height) * 100)
+    print ("total y%", ypercent)
+    maxruntime = 5000
+    minruntime = 1000
+    runtime = (ypercent/100) * maxruntime
+    print ("runtime calculated as", runtime, "ms of a possible", maxruntime, "ms")
+
+    #run forward
     #right wheel
     GPIO.output(9, 0) #forward
     GPIO.output(10, 1)
     #left wheel
-    GPIO.output(7, 1) #reverse
-    GPIO.output(8, 0)
-elif (turn=="right") :
-    #right wheel
-    GPIO.output(9, 1) #reverse
-    GPIO.output(10, 0)
-    #left wheel
     GPIO.output(7, 0) #forward
     GPIO.output(8, 1)
-else :
-    print ("AGHHHhhhh.......! 29")
-    pygame.quit()
-    sys.exit()
-    
-intime=True
-textx = 100
-texty = 300
-rrange = 40
-while intime: # =========the robot positioning loop=============
-    DISPLAYSURF.fill(SNOW)
-    textxr = textx - (rrange/2) + random.randrange(0,rrange)
-    textyr = texty - (rrange/2) + random.randrange(0,rrange)
-    DISPLAYSURF.blit(text, (textxr ,textyr))
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
 
-    pygame.display.update()
-    fpsClock.tick(12)
-    if (initialT + delayMS) < pygame.time.get_ticks() :
-        print("time elapsed")
-        intime = False
+    intime=True
+    textx = 100
+    texty = 300
+    rrange = 40
+    initialT = pygame.time.get_ticks()
+    delayMS = runtime + minruntime
+    text = gameFont.render("Running Robot", True, (0,0,0))
+    while intime: # =========the robot driving loop=============
+        DISPLAYSURF.fill(SNOW)
+        textxr = textx - (rrange/2) + random.randrange(0,rrange)
+        textyr = texty - (rrange/2) + random.randrange(0,rrange)
+        DISPLAYSURF.blit(text, (textxr ,textyr))
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
 
-#clear motor signals
-GPIO.output(7, 0)
-GPIO.output(8, 0)
-GPIO.output(9, 0)
-GPIO.output(10, 0)
+        pygame.display.update()
+        fpsClock.tick(12)
+        if (initialT + delayMS) < pygame.time.get_ticks() :
+            print("time elapsed")
+            intime = False
+                
+    #clear motor signals
+    GPIO.output(7, 0)
+    GPIO.output(8, 0)
+    GPIO.output(9, 0)
+    GPIO.output(10, 0)
+    GPIO.cleanup()
 
-
-# ===================== Up Down Loop ======================          
-x = 10
-y = 10
-speed = 5
-direction = 'down'
-puckWidth = 100
-puckHeight = 100      
-pressed = False
-
-while not pressed: # the up-down loop
-    DISPLAYSURF.fill(SNOW)
-
-    if direction == 'down':
-        y += speed
-        if y >= height:
-            direction = 'up'
-
-    elif direction == 'up':
-        y -= speed
-        if y <= 10:
-            direction = 'down'
-
-
-    #DISPLAYSURF.blit(catImg, (catx, caty))
-    pygame.draw.rect(DISPLAYSURF, (255,0,0), (x, y, puckWidth, puckHeight))
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    pygame.display.update()
-    fpsClock.tick(FPS)
-    if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
-      print ("Pressed at y = ", y)
-      pressed = True
-
-# show disconnect message
-text = gameFontSmall.render("DISCONNECT ROBOT NOW!", True, (255,0,0))
-# press button to start countdown
-pressed = False
-textx = 10
-texty = 300
-rrange = 40
-while not pressed: # the wait for button indicting disconnect loop
-    DISPLAYSURF.fill(SNOW)
-    textxr = textx - (rrange/2) + random.randrange(0,rrange)
-    textyr = texty - (rrange/2) + random.randrange(0,rrange)
-    DISPLAYSURF.blit(text, (textxr ,textyr))
-
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    pygame.display.update()
-    fpsClock.tick(FPS)
-    if dev.ctrl_transfer(bmRequestType=0xA1, bRequest=1, wValue=0x300, data_or_wLength=8, timeout=500)[0] :
-      print ("Pressed at y = ", y)
-      pressed = True
-
-intime=True
-countdownms = 10 * 1000
-initialT = pygame.time.get_ticks()
-delayMS = countdownms
-
-text = gameFont.render("Counting Down", True, (0,100,0))
-while intime: # =========the robot positioning loop=============
-    DISPLAYSURF.fill(SNOW)
-    textxr = textx - (rrange/2) + random.randrange(0,rrange)
-    textyr = texty - (rrange/2) + random.randrange(0,rrange)
-    DISPLAYSURF.blit(text, (textxr ,textyr))
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    pygame.display.update()
-    fpsClock.tick(12)
-    if (initialT + delayMS) < pygame.time.get_ticks() :
-        print("time elapsed")
-        intime = False
-            
-
-
-
-
-
-ypercent = 100 - ((y/height) * 100)
-print ("total y%", ypercent)
-maxruntime = 5000
-minruntime = 1000
-runtime = (ypercent/100) * maxruntime
-print ("runtime calculated as", runtime, "ms of a possible", maxruntime, "ms")
-
-#run forward
-#right wheel
-GPIO.output(9, 0) #forward
-GPIO.output(10, 1)
-#left wheel
-GPIO.output(7, 0) #forward
-GPIO.output(8, 1)
-
-intime=True
-textx = 100
-texty = 300
-rrange = 40
-initialT = pygame.time.get_ticks()
-delayMS = runtime + minruntime
-text = gameFont.render("Running Robot", True, (0,0,0))
-while intime: # =========the robot positioning loop=============
-    DISPLAYSURF.fill(SNOW)
-    textxr = textx - (rrange/2) + random.randrange(0,rrange)
-    textyr = texty - (rrange/2) + random.randrange(0,rrange)
-    DISPLAYSURF.blit(text, (textxr ,textyr))
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-
-    pygame.display.update()
-    fpsClock.tick(12)
-    if (initialT + delayMS) < pygame.time.get_ticks() :
-        print("time elapsed")
-        intime = False
-            
-#clear motor signals
-GPIO.output(7, 0)
-GPIO.output(8, 0)
-GPIO.output(9, 0)
-GPIO.output(10, 0)
-GPIO.cleanup()
-
-pygame.quit()
+    #pygame.quit()
